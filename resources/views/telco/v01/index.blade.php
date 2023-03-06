@@ -25,6 +25,12 @@ span#container-api-response-title {
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
 
+                        <div id="alert-telco-login-needed" class="alert alert-danger alert-dismissible fade show" role="alert" style="display:none;">
+                            <i class="bi bi-exclamation-octagon me-1"></i>
+                            Login API needed.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
                         <form id="form-request-v01" class="row g-3 needs-validation" method="POST" action="{{ route('telco_v01.send') }}">
                             {{ csrf_field() }}
                             
@@ -232,9 +238,15 @@ span#container-api-response-title {
                                     </fieldset>
                                 </div>
                             </div>
-                
+
+                            {{--
+                            <div class="col-lg-12">
+                                <textarea class="form-control" style="height:100px;" readonly>{{ session('api_token') }}</textarea>
+                            </div>
+                            --}}
+
                             <hr>
-                
+
                             <div class="text-center">
                                 <button type="submit" id="btn-submit" class="btn btn-primary">Submit</button>
                                 <input type="hidden" id="selected-product" name="selected-product" value="">
@@ -383,6 +395,7 @@ function prepareSubmitButton() {
 
         var okSubmit = true;
 
+        $('#alert-telco-login-needed').hide();
         if ($('#input-transaction-id').val().trim() === '') okSubmit = false;
         if ($('#input-consent').val().trim() === '') okSubmit = false;
         
@@ -413,28 +426,33 @@ function submitData(formData) {
         processData: false,
         contentType: false,
         cache: false,
-        success: function(response) {
-            // response = JSON.parse(response);
-            console.log(response);
+        success: function(apiResponse) {
+            var response = apiResponse.data;
+            // console.log(response);
 
-            if (response.request !== undefined) {
-                $('#container-request-raw-data').val(JSON.stringify(response.request));
-            }
-            
-            if (response.api_response !== undefined) {
-                $('#container-respond-raw-data').val(JSON.stringify(response.api_response));
+            if (response !== undefined) {
+                if (response.request !== undefined) {
+                    $('#container-request-raw-data').val(JSON.stringify(response.request));
+                }
+                
+                if (response.api_response !== undefined) {
+                    $('#container-respond-raw-data').val(JSON.stringify(response.api_response));
 
-                var statusCode = parseInt(response.api_response.transaction.status_code, 10);
-                if (statusCode == 0) {
-                    $('#container-respond-deciphered-ciphertext').val(JSON.stringify(response.result));
+                    var statusCode = parseInt(response.api_response.transaction.status_code, 10);
+                    if (statusCode == 0) {
+                        $('#container-respond-deciphered-ciphertext').val(JSON.stringify(response.result));
+                    }
+
+                    tempApiRequest[selectedProduct] = response;
+                    tempApiResponses[selectedProduct] = response;
                 }
 
-                tempApiRequest[selectedProduct] = response;
-                tempApiResponses[selectedProduct] = response;
+                if (response.error !== undefined) {
+                    console.log(response.error);
+                }
             }
-
-            if (response.error !== undefined) {
-                console.log(response.error);
+            else {
+                $('#alert-telco-login-needed').show();
             }
         },
         error: function(error) {

@@ -17,7 +17,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Dalnet Test',
             'username' => 'dalnet-test',
-            'email' => 'dalnettest@test.com',
+            'email' => 'dalnettest@gmail.com',
             'password' => Hash::make('12345678'),
             'enc_key' => 1,
         ]);

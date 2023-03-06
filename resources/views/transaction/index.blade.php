@@ -88,7 +88,7 @@
                   </div>
                   -->
                   <div class="ps-3">
-                    <h6>{{ $total_success_rate }} %</h6>
+                    <h6>{{ number_format($total_success_rate, '2', ',', '.') }} %</h6>
                     <!-- <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">increase</span> -->
                   </div>
                 </div>

@@ -37,7 +37,6 @@ class TelcoController extends Controller
     public function send(Request $request)
     {
         // dd($request->input());
-        // dd(Auth::user());
 
         $validator = Validator::make($request->input(), [
             'input_product_id' => 'required|string',
@@ -55,10 +54,11 @@ class TelcoController extends Controller
             ->first();
 
         if ($product) {
-            $gatewayUrl = env('DALNET_TELCO_API_GATEWAY', '');
+            $apisUrl = env('DALNET_TELCO_API_GATEWAY', '') . '/v1';
         
             $postedRequest = array(
                 'transaction_id' => $request->input_transaction_id,
+                'client_id' => Auth::user()->username,
                 'product_id' => $product->telco_name,
                 'consent' => $request->input_consent,
                 'msisdn_imei_key' => $request->input_msisdn,
@@ -93,41 +93,41 @@ class TelcoController extends Controller
                     break;
         
                 case 'ktpscore':
-                    $gatewayUrl = str_replace('<endpoint>', 'ktp_match', $gatewayUrl);
+                    $apisUrl = str_replace('<endpoint>', 'ktp_match', $apisUrl);
                     $postedRequest['nik'] = $request->input_nik;
                     break;
         
                 case 'recycle':
-                    $gatewayUrl = str_replace('<endpoint>', 'recycle_number', $gatewayUrl);
+                    $apisUrl = str_replace('<endpoint>', 'recycle_number', $apisUrl);
                     $postedRequest['timestamp'] = date('Y-m-d', time());
                     break;
         
                 case 'roaming2':
-                    $gatewayUrl = str_replace('<endpoint>', 'active_roaming', $gatewayUrl);
+                    $apisUrl = str_replace('<endpoint>', 'active_roaming', $apisUrl);
                     break;
         
                 case 'lastloc2':
-                    $gatewayUrl = str_replace('<endpoint>', 'last_location', $gatewayUrl);
+                    $apisUrl = str_replace('<endpoint>', 'last_location', $apisUrl);
                     $postedRequest['param'] = strtoupper($request->input_param);
                     break;
         
                 case 'loyalist':
-                    $gatewayUrl = str_replace('<endpoint>', 'interest', $gatewayUrl);
+                    $apisUrl = str_replace('<endpoint>', 'interest', $apisUrl);
                     $postedRequest['partner'] = $request->input_partner_name;
                     break;
         
                 case 'telcoses':
-                    $gatewayUrl = str_replace('<endpoint>', 'telco_ses', $gatewayUrl);
+                    $apisUrl = str_replace('<endpoint>', 'telco_ses', $apisUrl);
                     $postedRequest['consent_id'] = $request->input_consent_id;
                     $postedRequest['partner'] = $request->input_partner_name;
                     break;
         
                 case 'substat2':
-                    $gatewayUrl = str_replace('<endpoint>', 'active_status', $gatewayUrl);
+                    $apisUrl = str_replace('<endpoint>', 'active_status', $apisUrl);
                     break;
         
                 case 'numberswitching2': 
-                    $gatewayUrl = str_replace('<endpoint>', '1_imei_multiple_number', $gatewayUrl);
+                    $apisUrl = str_replace('<endpoint>', '1_imei_multiple_number', $apisUrl);
                     $postedRequest['msisdn_imei_key'] = $request->input_imei;
                     $postedRequest['param'] = $request->input_param_1_imei_multiple_number;
                     $postedRequest['min'] = $request->input_min;
@@ -135,37 +135,38 @@ class TelcoController extends Controller
                     break;
         
                 case 'forwarding2':
-                    $gatewayUrl = str_replace('<endpoint>', 'call_forwarding_status', $gatewayUrl);
+                    $apisUrl = str_replace('<endpoint>', 'call_forwarding_status', $apisUrl);
                     break;
         
                 case 'simswap':
-                    $gatewayUrl = str_replace('<endpoint>', 'sim_swap', $gatewayUrl);
+                    $apisUrl = str_replace('<endpoint>', 'sim_swap', $apisUrl);
                     break;
         
                 case 'tscore':
-                    $gatewayUrl = str_replace('<endpoint>', 'telco_score_bin_25', $gatewayUrl);
+                    $apisUrl = str_replace('<endpoint>', 'telco_score_bin_25', $apisUrl);
                     $postedRequest['srd_flag'] = $request->radio_srd_flag;
                     break;
             }
-            // dd($postedRequest);
+            // dd($postedRequest); die();
         
             $curl = curl_init();
         
             curl_setopt_array(
                 $curl,
                 array(
-                    CURLOPT_URL => $gatewayUrl,
+                    CURLOPT_URL => $apisUrl,
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_MAXREDIRS => 10,
                     CURLOPT_TIMEOUT => 30,
                     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                    CURLOPT_CUSTOMREQUEST => "POST",
+                    CURLOPT_CUSTOMREQUEST => 'POST',
                     CURLOPT_POSTFIELDS => $postedRequest,
                     CURLOPT_HTTPHEADER => array(
-                        "Accept: */*",
+                        'Accept: */*',
+                        'Authorization: Bearer ' . session('api_token'),
                     ),
-                    // CURLOPT_SSL_VERIFYHOST => $CA_LOCATION,
-                    // CURLOPT_SSL_VERIFYPEER => $CA_LOCATION,
+                    CURLOPT_SSL_VERIFYHOST => storage_path('cacert/cacert.pem'),
+                    CURLOPT_SSL_VERIFYPEER => storage_path('cacert/cacert.pem'),
                 )
             );
             
@@ -174,11 +175,8 @@ class TelcoController extends Controller
             $curlResult = '';
             curl_close($curl);
 
-            if ($err) {
-                $curlResult = [ 'error' => $err ];
-            }
+            if ($err) { $curlResult = [ 'error' => $err ]; }
             else { $curlResult = $response; }
-            // dd($curlResult);
 
             $requestId = $this->saveApiRequest(
                 Auth::user()->id,
@@ -190,11 +188,16 @@ class TelcoController extends Controller
 
             if (empty($err)) {
                 $jsonResponse = json_decode($response);
-                $this->saveApiResponse(
-                    $requestId->id,
-                    $jsonResponse->api_response->transaction->status_code,
-                    $jsonResponse->api_response->transaction->status_desc
-                );
+                // dd($jsonResponse); die();
+
+                $statusCode = '-1';
+                $statusDesc = 'Access token failed';
+                if ($jsonResponse != null) {
+                    $statusCode = $jsonResponse->data->api_response->transaction->status_code;
+                    $statusDesc = $jsonResponse->data->api_response->transaction->status_desc;
+                }
+
+                $this->saveApiResponse($requestId->id, $statusCode, $statusDesc);
             }
             
             return response()->json(json_decode($curlResult), 200);

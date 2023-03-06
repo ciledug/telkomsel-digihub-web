@@ -63,15 +63,62 @@ class LoginController extends Controller
             $fieldType => $input['username'],
             'password' => $input['password']
         ))) {
+            $loginApiResponse = json_decode($this->loginApi(Auth::user()->email, $input['password']));
+            // dd($loginApiResponse); // die();
+            
+            if (isset($loginApiResponse->code) && ($loginApiResponse->code === 200)) { $loginApiResponse = $loginApiResponse->data->token; }
+            else { $loginApiResponse = ''; }
+            session([
+                'api_token' => $loginApiResponse,
+            ]);
+
             UserLog::create([
                 'user_id' => Auth::user()->id,
                 'last_login' => Carbon::now('Asia/Jakarta')->format('Y-m-d H:i:s'),
                 'last_ip_address' => $request->ip(),
             ]);
+
             return redirect()->route('dashboard');
         }
         else {
             return back()->withErrors($validator)->withInput();
         }
+    }
+
+    private function loginApi($email, $password)
+    {
+        $apiLoginUrl = env('DALNET_TELCO_API_GATEWAY', '') . '/login';
+        // dd($apiLoginUrl);
+
+        $curl = curl_init();
+        
+        curl_setopt_array(
+            $curl,
+            array(
+                CURLOPT_URL => $apiLoginUrl,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_POSTFIELDS => [
+                    'email' => $email,
+                    'password' => $password,
+                ],
+                CURLOPT_HTTPHEADER => array(
+                    'Accept: */*',
+                ),
+                CURLOPT_SSL_VERIFYHOST => storage_path('cacert/cacert.pem'),
+                CURLOPT_SSL_VERIFYPEER => storage_path('cacert/cacert.pem'),
+            )
+        );
+        
+        $response = curl_exec($curl); // echo 'response: ' . $response; die();
+        $err = curl_error($curl);
+        $curlResult = '';
+        curl_close($curl);
+
+        if (empty($err)) return $response;
+        else return $err;
     }
 }

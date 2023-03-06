@@ -20,7 +20,7 @@ class CreateClientApiResponseTable extends Migration
             $table->increments('id');
             $table->integer('request_id')->unsigned();
             $table->string('status_code', 15);
-            $table->string('status_description', 30);
+            $table->string('status_description', 100);
             $table->timestamps();
         });
     }
