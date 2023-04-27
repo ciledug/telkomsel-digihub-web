@@ -50,8 +50,7 @@ class DashboardController extends Controller
             ->leftJoin('client_api_responses', 'client_api_requests.id', '=', 'client_api_responses.request_id')
             ->leftJoin('products', 'client_api_requests.product_id', '=', 'products.id')
             ->where('client_api_requests.client_id', '=', Auth::user()->id)
-            // ->whereRaw('DATE(client_api_requests.created_at) = \'' . $today->format('Y-m-d') . '\'')
-            ->whereRaw('DATE(client_api_requests.created_at) = \'2023-04-17\'')
+            ->whereRaw('DATE(client_api_requests.created_at) = \'' . $today->format('Y-m-d') . '\'')
             ->orderBy('client_api_requests.id', 'DESC')
             ->get();
         // dd($apiRequests);
