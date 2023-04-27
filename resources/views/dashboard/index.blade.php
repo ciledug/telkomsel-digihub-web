@@ -22,9 +22,8 @@
         <div class="row">
           
           <!-- total calls -->
-          <div class="col-xxl-3 col-xl-6 col-md-6">
+          <div class="col-xxl-6 col-xl-6 col-md-6">
             <div class="card info-card sales-card">
-
               <!--
               <div class="filter">
                 <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
@@ -50,7 +49,44 @@
                   -->
 
                   <div class="ps-3">
-                    <h6>{{ $total_success_calls + $total_failed_calls }}</h6>
+                    <h6>{{ number_format($total_success_calls + $total_failed_calls, 0, ',', '.') }}</h6>
+                    <!-- <span class="text-success small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">increase</span> -->
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- apis used -->
+          <div class="col-xxl-6 col-xl-6 col-md-6">
+            <div class="card info-card sales-card">
+              <!--
+              <div class="filter">
+                <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                  <li class="dropdown-header text-start">
+                    <h6>Filter</h6>
+                  </li>
+                  <li><a class="dropdown-item" href="#">Today</a></li>
+                  <li><a class="dropdown-item" href="#">This Month</a></li>
+                  <li><a class="dropdown-item" href="#">This Year</a></li>
+                </ul>
+              </div>
+              -->
+
+              <div class="card-body">
+                <h5 class="card-title">Today's API Used <!-- <span>| Today</span> --></h5>
+
+                <div class="d-flex align-items-center">
+                  <!--
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                    <i class="bi bi-cart"></i>
+                  </div>
+                  -->
+
+                  <div class="ps-3">
+                    <h6>{{ number_format(count($used_apis_list), 0, ',', '.') }}</h6>
                     <!-- <span class="text-success small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">increase</span> -->
                   </div>
                 </div>
@@ -60,9 +96,8 @@
           </div>
 
           <!-- success rate -->
-          <div class="col-xxl-3 col-xl-6 col-md-6">
+          <div class="col-xxl-4 col-xl-6 col-md-4">
             <div class="card info-card revenue-card">
-
               <!--
               <div class="filter">
                 <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
@@ -88,7 +123,7 @@
                   </div>
                   -->
                   <div class="ps-3">
-                    <h6>{{ $total_success_rate }} %</h6>
+                    <h6>{{ number_format($total_success_rate, 2, ',', '.') }} %</h6>
                     <!-- <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">increase</span> -->
                   </div>
                 </div>
@@ -98,7 +133,7 @@
           </div>
 
           <!-- success calls -->
-          <div class="col-xxl-3 col-xl-6 col-md-6">
+          <div class="col-xxl-4 col-xl-6 col-md-4">
             <div class="card info-card customers-card">
               <!--
               <div class="filter">
@@ -125,7 +160,7 @@
                   </div>
                   -->
                   <div class="ps-3">
-                    <h6>{{ $total_success_calls }}</h6>
+                    <h6>{{ number_format($total_success_calls, 0, ',', '.') }}</h6>
                     <!-- <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">decrease --></span>
                   </div>
                 </div>
@@ -135,7 +170,7 @@
           </div>
 
           <!-- failed calls -->
-          <div class="col-xxl-3 col-xl-6 col-md-6">
+          <div class="col-xxl-4 col-xl-6 col-md-4">
             <div class="card info-card customers-card">
               <!--
               <div class="filter">
@@ -162,7 +197,7 @@
                   </div>
                   -->
                   <div class="ps-3">
-                    <h6>{{ $total_failed_calls }}</h6>
+                    <h6>{{ number_format($total_failed_calls, 0, ',', '.') }}</h6>
                     <!-- <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">decrease --></span>
                   </div>
                 </div>
@@ -171,7 +206,7 @@
             </div>
           </div>
           
-          <!-- recent api calls -->
+          <!-- 10 recent api calls -->
           <div class="col-12">
             <div class="card recent-sales overflow-auto">
               <!--
@@ -214,7 +249,7 @@
                       </thead>
                   
                       <tbody>
-                        @foreach($current_list AS $keyApiCalls => $valApiCalls)
+                        @foreach($last_requests_list AS $keyApiCalls => $valApiCalls)
                         <tr>
                           <td scope="row">{{ $valApiCalls->created_at }}</td>
                           <!-- <td>{{ $valApiCalls->transaction_id }}</td> -->

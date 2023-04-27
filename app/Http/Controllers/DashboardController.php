@@ -30,11 +30,12 @@ class DashboardController extends Controller
         // dd($apiRequests);
 
         return view('dashboard.index', [
-            'total_api_request' => number_format($apiRequests['total_api_request'], 0, ',', '.'),
-            'total_success_calls' => number_format($apiRequests['total_success_calls'], 0, ',', '.'),
-            'total_failed_calls' => number_format($apiRequests['total_failed_calls'], 0, ',', '.'),
-            'total_success_rate' => number_format($apiRequests['total_success_rate'], 2, ',', '.'),
-            'current_list' => $apiRequests['top_ten_list'],
+            'total_api_request' => $apiRequests['total_api_request'],
+            'total_success_calls' => $apiRequests['total_success_calls'],
+            'total_failed_calls' => $apiRequests['total_failed_calls'],
+            'total_success_rate' => $apiRequests['total_success_rate'],
+            'last_requests_list' => $apiRequests['last_requests_list'],
+            'used_apis_list' => $apiRequests['used_apis_list'],
         ]);
     }
 
@@ -50,7 +51,8 @@ class DashboardController extends Controller
             ->leftJoin('client_api_responses', 'client_api_requests.id', '=', 'client_api_responses.request_id')
             ->leftJoin('products', 'client_api_requests.product_id', '=', 'products.id')
             ->where('client_api_requests.client_id', '=', Auth::user()->id)
-            ->whereRaw('DATE(client_api_requests.created_at) = \'' . $today->format('Y-m-d') . '\'')
+            // ->whereRaw('DATE(client_api_requests.created_at) = \'' . $today->format('Y-m-d') . '\'')
+            ->whereRaw('DATE(client_api_requests.created_at) = \'2023-04-19\'')
             ->orderBy('client_api_requests.id', 'DESC')
             ->get();
         // dd($apiRequests);
@@ -85,7 +87,8 @@ class DashboardController extends Controller
             'total_success_calls' => $totalSuccessCalls,
             'total_failed_calls' => $totalFailedCalls,
             'total_success_rate' => $totalSuccessRate,
-            'top_ten_list' => $topTenList,
+            'last_requests_list' => $topTenList,
+            'used_apis_list' => $apiList,
         );
     }
 }

@@ -26,7 +26,6 @@
           <!-- total calls -->
           <div class="col-xxl-3 col-xl-6 col-md-6">
             <div class="card info-card sales-card">
-
               <!--
               <div class="filter">
                 <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
@@ -64,7 +63,6 @@
           <!-- success rate -->
           <div class="col-xxl-3 col-xl-6 col-md-6">
             <div class="card info-card revenue-card">
-
               <!--
               <div class="filter">
                 <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
