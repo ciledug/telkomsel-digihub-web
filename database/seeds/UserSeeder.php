@@ -16,10 +16,10 @@ class UserSeeder extends Seeder
     {
         User::create([
             'name' => 'Dalnet Test',
-            'username' => 'dalnet-test',
+            'username' => 'dalnettest@gmail.com',
             'email' => 'dalnettest@gmail.com',
             'password' => Hash::make('12345678'),
-            'enc_key' => 1,
+            'enc_key' => 0, // 0:both, 1:dalnet-key, 2:client-key
         ]);
     }
 }

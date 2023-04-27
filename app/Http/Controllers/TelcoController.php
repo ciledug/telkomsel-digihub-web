@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use App\Models\ClientApiRequest;
 use App\Models\ClientApiResponse;
 use App\Models\Product;
+use App\Models\UserProfile;
 
 class TelcoController extends Controller
 {
@@ -23,6 +24,7 @@ class TelcoController extends Controller
     public function index()
     {
         return view('telco.v01.index', [
+            'profile' => UserProfile::where('user_id', '=', Auth::user()->id)->first(),
             'products' => Product::all(),
         ]);
     }
@@ -30,6 +32,7 @@ class TelcoController extends Controller
     public function index_02()
     {
         return view('telco.v02.index', [
+            'profile' => UserProfile::where('user_id', '=', Auth::user()->id)->first(),
             'products' => Product::all(),
         ]);
     }
@@ -37,6 +40,7 @@ class TelcoController extends Controller
     public function send(Request $request)
     {
         // dd($request->input());
+        // dd(Auth::user());
 
         $validator = Validator::make($request->input(), [
             'input_product_id' => 'required|string',
@@ -58,7 +62,7 @@ class TelcoController extends Controller
         
             $postedRequest = array(
                 'transaction_id' => $request->input_transaction_id,
-                'client_id' => Auth::user()->username,
+                'client_id' => session('client_id'),
                 'product_id' => $product->telco_name,
                 'consent' => $request->input_consent,
                 'msisdn_imei_key' => $request->input_msisdn,

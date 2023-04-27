@@ -7,9 +7,10 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 use App\Models\UserLog;
-use Carbon\Carbon;
+use App\Models\UserProfile;
 
 class LoginController extends Controller
 {
@@ -63,22 +64,35 @@ class LoginController extends Controller
             $fieldType => $input['username'],
             'password' => $input['password']
         ))) {
-            $loginApiResponse = json_decode($this->loginApi(Auth::user()->email, $input['password']));
-            // dd($loginApiResponse); // die();
-            
-            if (isset($loginApiResponse->code) && ($loginApiResponse->code === 200)) { $loginApiResponse = $loginApiResponse->data->token; }
-            else { $loginApiResponse = ''; }
-            session([
-                'api_token' => $loginApiResponse,
-            ]);
+            $userProfile = UserProfile::where('user_id', '=', Auth::user()->id)
+                ->first();
 
-            UserLog::create([
-                'user_id' => Auth::user()->id,
-                'last_login' => Carbon::now('Asia/Jakarta')->format('Y-m-d H:i:s'),
-                'last_ip_address' => $request->ip(),
-            ]);
+            if ($userProfile) {
+                Auth::user()->client_id = $userProfile->client_id;
 
-            return redirect()->route('dashboard');
+                $loginApiResponse = json_decode($this->loginApi(Auth::user()->email, $input['password'])); // dd($loginApiResponse); // die();
+
+                if (isset($loginApiResponse->code) && ($loginApiResponse->code === 200)) {
+                    $loginApiResponse = $loginApiResponse->data->token;
+                }
+                else {
+                    $loginApiResponse = '';
+                }
+
+                session(['api_token' => $loginApiResponse]);
+                session(['client_id' => $userProfile->client_id]);
+
+                UserLog::create([
+                    'user_id' => Auth::user()->id,
+                    'last_login' => Carbon::now('Asia/Jakarta')->format('Y-m-d H:i:s'),
+                    'last_ip_address' => $request->ip(),
+                ]);
+    
+                return redirect()->route('dashboard');
+            }
+            else {
+                return back()->withErrors($validator)->withInput();
+            }
         }
         else {
             return back()->withErrors($validator)->withInput();

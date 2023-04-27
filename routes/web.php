@@ -15,14 +15,18 @@ Route::get('/', function() { return view('auth.login'); });
 
 Auth::routes();
 
+Route::middleware('guest')->group(function() {
+    Route::get('register', 'Auth\RegisterController@index');
+    Route::post('register', 'Auth\RegisterController@register')->name('register');
+});
+
 Route::middleware('auth')->group(function() {
     Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
 
     Route::prefix('transaction')->group(function() {
         Route::get('/', 'TransactionHistoryController@index')->name('transactions');
+        Route::get('/{param}', 'TransactionHistoryController@show')->name('transactions.show');
     });
-
-    Route::resource('apicalls', 'ApiCallsController');
 
     Route::prefix('telco')->group(function() {
         Route::get('/v01', 'TelcoController@index')->name('telco_v01');
@@ -35,4 +39,5 @@ Route::middleware('auth')->group(function() {
     Route::put('profile/newpassword', 'ProfileController@updatePassword')->name('profile.newpassword');
     Route::resource('profile', 'ProfileController');
     
+    Route::resource('apicalls', 'ApiCallsController');
 });

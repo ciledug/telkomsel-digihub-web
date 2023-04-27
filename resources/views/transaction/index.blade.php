@@ -19,6 +19,8 @@
       
       <!-- Left side columns -->
       <div class="col-lg-12">
+
+        @if (!isset($show))
         <div class="row">
 
           <!-- total calls -->
@@ -172,6 +174,7 @@
           </div>
 
         </div>
+        @endif
 
         <div class="row">
           <div class="col-12">
@@ -180,6 +183,7 @@
                 <h5 class="card-title"><!-- 5 Recent API Calls <span>| Today</span> --></h5>
                 <div class="dataTable-wrapper dataTable-loading no-footer sortable searchable fixed-columns">
                   
+                  @if (!isset($show))
                   <div class="dataTable-container">
                     <table class="table table-hover">
                       <thead>
@@ -188,16 +192,19 @@
                             <span class="dataTable-sorter">Date / Month</span>
                           </th>
                           <th scope="col" data-sortable="" class="text-end">
-                            <span class="dataTable-sorter">Total Calls</span>
-                          </th>
-                          <th scope="col" data-sortable="" class="text-end">
                             <span class="dataTable-sorter">API Used</span>
                           </th>
                           <th scope="col" data-sortable="" class="text-end">
-                            <span class="dataTable-sorter">Total Success Calls</span>
+                            <span class="dataTable-sorter">Total Calls</span>
                           </th>
                           <th scope="col" data-sortable="" class="text-end">
-                            <span class="dataTable-sorter">Total Failed Calls</span>
+                            <span class="dataTable-sorter">Success Calls</span>
+                          </th>
+                          <th scope="col" data-sortable="" class="text-end">
+                            <span class="dataTable-sorter">Failed Calls</span>
+                          </th>
+                          <th scope="col" data-sortable="" class="text-end">
+                            <span class="dataTable-sorter">Success Rate %</span>
                           </th>
                           <th scope="col" data-sortable="" class="text-end">
                             <span class="dataTable-sorter">Totall Bill</span>
@@ -208,20 +215,74 @@
                       <tbody>
                         @foreach($api_requests AS $keyApiCalls => $valApiCalls)
                         <tr>
-                          <td>{{ Carbon\Carbon::parse($valApiCalls->created_at)->format('Y-m-d') }}</td>
-                          <td class="text-end">{{ number_format($valApiCalls->total_calls, 0, ',', '.') }}</td>
-                          <td class="text-end">{{ number_format($valApiCalls->api_used, 0, ',', '.') }}</td>
-                          <td class="text-end">{{ number_format($valApiCalls->success_calls, 0, ',', '.') }}</td>
-                          <td class="text-end">{{ number_format($valApiCalls->failed_calls, 0, ',', '.') }}</td>
-                          <td class="text-end">{{ number_format($valApiCalls->total_bill, 0, ',', '.') }}</td>
+                          <td><a href="{{ route('transactions.show', $valApiCalls['api_date']) }}">{{ $valApiCalls['api_date'] }}</a></td>
+                          <td class="text-end">{{ number_format($valApiCalls['count_product_apis'], 0, ',', '.') }}</td>
+                          <td class="text-end">{{ number_format($valApiCalls['count_total_calls'], 0, ',', '.') }}</td>
+                          <td class="text-end">{{ number_format($valApiCalls['count_success_calls'], 0, ',', '.') }}</td>
+                          <td class="text-end">{{ number_format($valApiCalls['count_failed_calls'], 0, ',', '.') }}</td>
+                          <td class="text-end">
+                            @php
+                              $successRate = ($valApiCalls['count_success_calls'] / $valApiCalls['count_total_calls']) * 100;
+                              echo number_format($successRate, 0, ',', '.');
+                            @endphp
+                          </td>
+                          <td class="text-end">{{ number_format(0, 0, ',', '.') }}</td>
                         </tr>
                         @endforeach
                       </tbody>
                     </table>
 
                     {{ $api_requests->links() }}
-
                   </div>
+                  @endif
+
+
+                  <!-- Per date details -->
+                  @if (isset($show) && ($show === 'list-per-date'))
+                  <div class="dataTable-container">
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th scope="col" data-sortable="" style="width: 15.601%;">
+                            <span class="dataTable-sorter">Date Time</span>
+                          </th>
+                          <th scope="col" data-sortable="">
+                            <span class="dataTable-sorter">Product API</span>
+                          </th>
+                          <th scope="col" data-sortable="">
+                            <span class="dataTable-sorter">Transaction ID</span>
+                          </th>
+                          <th scope="col" data-sortable="">
+                            <span class="dataTable-sorter">Consent ID</span>
+                          </th>
+                          <th scope="col" data-sortable="">
+                            <span class="dataTable-sorter">Status Description</span>
+                          </th>
+                        </tr>
+                      </thead>
+                  
+                      <tbody>
+                        @foreach($transactions_list AS $key => $value)
+                        <tr>
+                          <td>{{ $value['created_at'] }}</td>
+                          <td>{{ $value['api_name'] }}</td>
+                          <td>{{ $value['transaction_id'] }}</td>
+                          <td>{{ $value['consent_ref'] }}</td>
+
+                          @if ($value->status_code === '00000')
+                          <td><span class="badge bg-success">{{ $value['status_description'] }}</span></td>
+                          @else
+                          <td><span class="badge bg-danger">{{ $value['status_description'] }}</span></td>
+                          @endif
+                        </tr>
+                        @endforeach
+                      </tbody>
+                    </table>
+
+                    {{ $transactions_list->links() }}
+                  </div>
+                  @endif
+
                 </div>
               </div>
             </div>

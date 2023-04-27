@@ -14,14 +14,15 @@ class CreateUserProfilesTable extends Migration
     public function up()
     {
         Schema::create('user_profiles', function (Blueprint $table) {
-            $table->engine = 'MyISAM';
+            // $table->engine = 'MyISAM';
             $table->collaction = 'utf8mb4_unicode_ci';
 
             $table->increments('id');
             $table->integer('user_id')->unsigned();
+            $table->string('client_id', 15);
             $table->string('company', 50);
             $table->datetime('join_date')->nullable();
-            $table->tinyInteger('number_of_apis')->nullable();
+            $table->tinyInteger('number_of_apis')->unsigned()->default(0)->nullable();
             $table->string('legal_entity', 50)->nullable();
             $table->string('business_field', 50)->nullable();
             $table->string('address', 255)->nullable();

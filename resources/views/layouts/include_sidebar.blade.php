@@ -46,35 +46,35 @@
         </li>
 
         <!-- api test -->
-        @if (Auth::user()->enc_key === 1)
+        @if ((Auth::user()->enc_key === 1) || (Auth::user()->enc_key === 0))
         <!-- telco v01 -->
         <li class="nav-item">
             @if (Route::currentRouteName() !== 'telco_v01')
             <a class="nav-link collapsed" href="{{ route('telco_v01') }}">
                 <i class="bi bi-menu-button-wide"></i>
-                <span>Telco API v01 Test</span>
+                <span>Telco API Test</span>
             </a>
             @else
             <a class="nav-link" href="#">
                 <i class="bi bi-menu-button-wide"></i>
-                <span>Telco API v01 Test</span>
+                <span>Telco API Test</span>
             </a>
             @endif
         </li>
         @endif
         
-        @if (Auth::user()->enc_key === 2)
+        @if ((Auth::user()->enc_key === 2) || (Auth::user()->enc_key === 0))
         <!-- telco v02-->
         <li class="nav-item">
             @if (Route::currentRouteName() !== 'telco_v02')
             <a class="nav-link collapsed" href="{{ route('telco_v02') }}">
                 <i class="bi bi-menu-button-wide"></i>
-                <span>Telco API v02 Test</span>
+                <span>Telco SA API Test</span>
             </a>
             @else
             <a class="nav-link" href="#">
                 <i class="bi bi-menu-button-wide"></i>
-                <span>Telco API v02 Test</span>
+                <span>Telco SA API Test</span>
             </a>
             @endif
         </li>

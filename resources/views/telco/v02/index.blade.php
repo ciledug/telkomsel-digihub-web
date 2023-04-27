@@ -12,6 +12,18 @@
 </style>
 
 <main id="main" class="main">
+  <div class="pagetitle">
+    <h1>Telco Stand-Alone (SA) Test</h1>
+    <!--
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+        <li class="breadcrumb-item active">Dashboard</li>
+      </ol>
+    </nav>
+    -->
+  </div>
+
   <section class="section">
     <div class="row">
       <div class="col-lg-12">
@@ -23,17 +35,17 @@
               {{ csrf_field() }}
 
               <div class="col-lg-6">
-                <div class="col-md-12 input-transaction-id">
+                <div class="col-md-12 input-client-id">
+                  <div class="form-floating">
+                    <input type="text" class="form-control input-fields bg-light disabled" id="input-client-id" name="input_client_id" placeholder="Client ID" value="{{ $profile->client_id }}" required readonly="readonly">
+                    <label for="input-client-id">Client ID</label>
+                  </div>
+                </div>
+
+                <div class="col-md-12 mt-3 input-transaction-id">
                   <div class="form-floating">
                     <input type="text" class="form-control input-fields" id="input-transaction-id" name="input_transaction_id" placeholder="Transaction ID" value="{{ old('input_transaction_id') }}" required>
                     <label for="input-transaction-id">Transaction ID</label>
-                  </div>
-                </div>
-  
-                <div class="col-md-12 mt-3 input-client-id">
-                  <div class="form-floating">
-                    <input type="text" class="form-control input-fields" id="input-client-id" name="input_client_id" placeholder="Client ID" value="{{ old('input_client_id') }}" required>
-                    <label for="input-client-id">Client ID</label>
                   </div>
                 </div>
   
@@ -67,9 +79,17 @@
 
                 <div class="col-md-12 mt-3 mb-3">
                   <div class="form-floating">
-                    <textarea class="form-control" id="container-request-ciphered-text" name="input_ciphered_text" style="height:200px;" placeholder="Ciphered text" required>{{ old('input_ciphered_text') }}</textarea>
+                    <textarea class="form-control" id="container-request-ciphered-text" name="input_ciphered_text" style="height:150px;" placeholder="Ciphered text" required>
+                      {{ old('input_ciphered_text') }}
+                    </textarea>
                     <label for="container-request-ciphered-text" class="form-label">Ciphered Text</label>
                   </div>
+                </div>
+
+                <div class="col-md-12 mt-3 mb-3 text-end">
+                  <button type="button" id="btn-dialog-enc-dec-instructions" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#dialog-enc-dec-instructions">
+                    Ciphered-Text Information
+                  </button>
                 </div>
                 
                 <!--
@@ -248,10 +268,11 @@
               
               <div class="text-center">
                 <button type="submit" id="btn-submit-request" class="btn btn-primary">Submit</button>
-                <input type="hidden" id="selected-product" name="selected-product" value="">
-                <input type="hidden" id="selected-address-info" name="selected-address-info" value="">
+                <input type="hidden" id="selected-product" name="selected_product" value="">
+                <input type="hidden" id="selected-address-info" name="selected_address_info" value="">
                 {{ csrf_field() }}
               </div>
+              
             </form>
           </div>
         </div>
@@ -266,7 +287,7 @@
             <form class="row g-3" id="form-input" name="form-input">
               <div class="col-12">
                 <label for="container-request-raw-data" class="form-label">Raw Data</label>
-                <textarea class="form-control" id="container-request-raw-data" style="height:200px;"></textarea>
+                <textarea class="form-control" id="container-request-raw-data" style="height:348px;"></textarea>
               </div>
             </form>
           </div>
@@ -290,6 +311,439 @@
               </div>
             </form>
           
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- dialog modal enc-dec ciphered-text -->
+    <div class="modal fade" id="dialog-enc-dec-instructions" tabindex="-1" style="display:none;" aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">CIphered Text Encryption-Decryption Code Samples</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body">
+            <p>
+              Ciphered-Text is actually an encrypted-string or randomized-string produced by scrambling some strings or texts in order to hide the real texts or
+              messages which one wants to send.
+            </p>
+            <p class="mb-4">
+              Below you can examine samples from some programming languages on how to produce the ciphered-text for Telkomsel Telco.
+            </p>
+
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="go-tab" data-bs-toggle="tab" data-bs-target="#go" type="button" role="tab" aria-controls="go" aria-selected="true">Go</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="java-tab" data-bs-toggle="tab" data-bs-target="#java" type="button" role="tab" aria-controls="java" aria-selected="false" tabindex="-1">Java</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="php-tab" data-bs-toggle="tab" data-bs-target="#php" type="button" role="tab" aria-controls="php" aria-selected="false" tabindex="-1">PHP</button>
+              </li>
+            </ul>
+
+            <div class="tab-content pt-2" id="tabs-content">
+              <div class="tab-pane fade active show" id="go" role="tabpanel" aria-labelledby="home-tab">
+                <pre>
+                  package main
+                  
+                  import (
+                    "bytes"
+                    "errors"
+                    "fmt"
+                    
+                    "crypto/aes"
+                    "crypto/cipher"
+                    "crypto/rand"
+                    "crypto/sha256"
+                    "encoding/base64"
+                  )
+                  
+                  // AESCBCEncrypt will encrypt plaint text with aes-256 cbc mode
+                  // and pkcs7 padding, then return an encoded base64 string.
+                  func AESCBCEncrypt(plainText string, secretKey string) (string, error) {
+                    // aes using 16 byte block size
+                    blockSize := 16
+                    
+                    // we want aes-256 so we need  256 bit (32 byte) secretKey
+                    // here we use sha256 for creating 256 bit (32 byte) key
+                    bKey := sha256.Sum256([]byte(secretKey))
+                    
+                    // The IV needs to be unique, but not secure. Therefore it's common to
+                    // include it at the beginning of the cipherText.
+                    // iv must be the same size as blocksize
+                    iv := make([]byte, blockSize)
+                    
+                    // assign randomize iv
+                    rand.Read(iv)
+                    
+                    // CBC mode works on blocks so plaintexts may need to be padded to the
+                    // next whole block. If the original plainText lengths are not a multiple of the block size,
+                    // padding must be added when encrypting.
+                    // pad the plainText with pkcs7
+                    bPlainText := PKCS7Padding([]byte(plainText), blockSize)
+                    
+                    // create empty byte as big as plainText that
+                    // has been padded to store encrypted text later on
+                    bCipherText := make([]byte, len(bPlainText))
+                    
+                    // create cipher block from bKey
+                    cipherBlock, _ := aes.NewCipher(bKey[:])
+                    
+                    // create new mode with cipherBlock key and iv
+                    mode := cipher.NewCBCEncrypter(cipherBlock, iv)
+                    
+                    // encrypt bPlainText and store to the bCipherText
+                    mode.CryptBlocks(bCipherText, bPlainText)
+                    
+                    // append iv to the beginning bCipherText
+                    bCipherText = append(iv, bCipherText...)
+                    
+                    // encode bCipherText with base64
+                    return base64.StdEncoding.EncodeToString(bCipherText), nil
+                  }
+                  
+                  // AESCBCDecrypt will decrypt base64 ciphertext with aes-256 cbc mode
+                  // and pkcs7 unpadding then return a plain text string.
+                  func AESCBCDecrypt(cipherText string, secretKey string) (string, error) {
+                    // aes using 16 byte block size
+                    blockSize := 16
+                    
+                    // we want aes-256 so we need  256 bit (32 byte) secretKey
+                    // here we use sha256 for creating 256 bit (32 byte) key
+                    bKey := sha256.Sum256([]byte(secretKey))
+                    
+                    // decode base64 from cipherText
+                    bCipherText, _ := base64.StdEncoding.DecodeString(cipherText)
+                    
+                    if len(bCipherText)%blockSize != 0 || len(bCipherText) < blockSize {
+                      return "", errors.New("ciphertext length (" + fmt.Sprint(len(bCipherText)) + ") is not multiple of the block size")
+                    }
+                    
+                    // The IV needs to be unique, but not secure. Therefore it's common to
+                    // include it at the beginning of the ciphertext.
+                    // here we copy the first blockSize byte from bCipherText
+                    iv := bCipherText[:blockSize]
+                    
+                    // remove iv from the bCipherText prefix
+                    bCipherText = bCipherText[len(iv):]
+                    
+                    // create empty byte based on bCipherText byte
+                    // to store decrypted text later on
+                    bPlaintext := make([]byte, len(bCipherText))
+                    
+                    // create cipher block from bKey
+                    cipherBlock, _ := aes.NewCipher(bKey[:])
+                    
+                    // create new mode with cipher block key and iv
+                    mode := cipher.NewCBCDecrypter(cipherBlock, iv)
+                    
+                    // decrypt bCipherText and store to the bPlaintext
+                    mode.CryptBlocks(bPlaintext, bCipherText)
+                    
+                    // If the original plaintext lengths are not a multiple of the block size,
+                    // padding that have been added when encrypting would be removed at this point.
+                    bPlaintext, err := PKCS7UnPadding(bPlaintext, blockSize)
+                    return string(bPlaintext), err
+                  }
+                  
+                  // PKCS7Padding pad the plaintext with pkcs7 method,
+                  // it will fill the blocksize (multiplication) with the int reminder of blocksize
+                  func PKCS7Padding(src []byte, blockSize int) []byte {
+                    paddingValue := (blockSize - len(src) % blockSize)
+                    padtext := bytes.Repeat([]byte{byte(paddingValue)}, paddingValue)
+                    return append(src, padtext...)
+                  }
+                  
+                  // PKCS7UnPadding unpad the plaintext with pkcs7 method,
+                  // it will substring original string from the block with the padded value int
+                  func PKCS7UnPadding(origData []byte, blockSize int) ([]byte, error) {
+                    length := len(origData)
+                    
+                    // take padded int value form last string
+                    unpadding := int(origData[length - 1])
+                    
+                    // check max padding from blocksize (16 byte)
+                    if blockSize < unpadding {
+                      return nil, errors.New("invalid unpadding length (" + fmt.Sprint(unpadding) + "), bad EncryptionKey or IV")
+                    }
+                    
+                    return origData[:(length - unpadding)], nil
+                  }
+                  
+                  func main() {
+                    // Encryption Test
+                    // -----------------------
+                    plainText1 := `{
+                      "transaction_id": "SOCIALECONOMY-TEST001",
+                      "msisdn": "628111243030",
+                      "consentID": "consent001",
+                      "partner_name": "testpartner"
+                    }`
+                    secretKey1 := "telkomselS3cr3tK3y"
+                    cipherText1, _ := AESCBCEncrypt(plainText1, secretKey1)
+                    fmt.Println("encrypted text: ", cipherText1)
+                    
+                    // Decryption Test
+                    // -----------------------
+                    cipherText2 := cipherText1
+                    secretKey2 := "telkomselS3cr3tK3y"
+                    plainText2, _ := AESCBCDecrypt(cipherText2, secretKey2)
+                    fmt.Println("plain text: ", plainText2)
+                  }
+                </pre>
+              </div>
+
+              <div class="tab-pane fade" id="java" role="tabpanel" aria-labelledby="profile-tab">
+                <pre>
+                  package src;
+
+                  import java.nio.charset.StandardCharsets;
+                  import java.security.InvalidAlgorithmParameterException;
+                  import java.security.InvalidKeyException;
+                  import java.security.MessageDigest;
+                  import java.security.NoSuchAlgorithmException;
+                  import java.security.SecureRandom;
+                  import java.security.spec.InvalidKeySpecException;
+                  import java.util.Arrays;
+                  import java.util.Base64;
+                  
+                  import javax.crypto.BadPaddingException;
+                  import javax.crypto.Cipher;
+                  import javax.crypto.IllegalBlockSizeException;
+                  import javax.crypto.NoSuchPaddingException;
+                  import javax.crypto.spec.IvParameterSpec;
+                  import javax.crypto.spec.SecretKeySpec;
+                  
+                  import org.json.JSONException;
+                  import org.json.JSONObject;
+                  
+                  public class AESCBC {
+                    // AES256CBCEncrypt will encrypt plaint text with aes-256 cbc mode
+                    // and pkcs7 padding, then return an encoded base64 string.
+                    public static String encrypt(String plainText, String secretKey) {
+                      try {
+                        // aes using 16 byte block size
+                        Integer blockSize = 16;
+                        
+                        // we want aes-256 so we need  256 bit (32 byte) secretKey
+                        // here we use sha256 for creating 256 bit (32 byte) key
+                        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                        byte[] bKey = digest.digest(secretKey.getBytes(StandardCharsets.UTF_8));
+                        SecretKeySpec skeySpec = new SecretKeySpec(bKey, "AES");
+                        
+                        // The IV needs to be unique, but not secure. Therefore it's common to
+                        // include it at the beginning of the cipherText.
+                        // iv must be the same size as blocksize
+                        SecureRandom randomSecureRandom = new SecureRandom();
+                        byte[] iv = new byte[blockSize];
+                        randomSecureRandom.nextBytes(iv);
+                        IvParameterSpec ivParams = new IvParameterSpec(iv);
+                        
+                        // CBC mode works on blocks so plaintexts may need to be padded to the
+                        // next whole block. If the original plainText lengths are not a multiple of the block size,
+                        // padding must be added when encrypting.
+                        // create cipher block with AES/CBC/PKCS5PADDING
+                        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+                        
+                        // init cipher
+                        cipher.init(Cipher.ENCRYPT_MODE, skeySpec, ivParams);
+                        
+                        // encrypt bPlainText and store to the bCipherText
+                        byte[] bCipherText = cipher.doFinal(plainText.getBytes());
+                        
+                        // append iv and bCipherText
+                        byte[] finalCipherText = new byte[iv.length + bCipherText.length];
+                        
+                        // append iv to the beginning
+                        System.arraycopy(iv, 0, finalCipherText, 0, iv.length);
+                        
+                        // append bCipherText after the iv
+                        System.arraycopy(bCipherText, 0, finalCipherText, iv.length, bCipherText.length);
+                        
+                        // encode bCipherText with base64
+                        return Base64.getEncoder().encodeToString(finalCipherText);
+
+                      } catch (Exception ex) {
+                        ex.printStackTrace();
+                      }
+                      
+                      return null;
+                    }
+                    
+                    // AES256CBCDecrypt will decrypt base64 ciphertext with aes-256 cbc mode
+                    // and pkcs5 unpadding then return a plain text string.
+                    public static String decrypt(String cipherText, String secretKey) {
+                      try {
+                        // aes using 16 byte block size
+                        Integer blockSize = 16;
+                        
+                        // we want aes-256 so we need  256 bit (32 byte) secretKey
+                        // here we use sha256 for creating 256 bit (32 byte) key
+                        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                        byte[] bKey = digest.digest(secretKey.getBytes(StandardCharsets.UTF_8));
+                        SecretKeySpec skeySpec = new SecretKeySpec(bKey, "AES");
+                        
+                        // decode base64 from cipherText
+                        byte[] bCipherText = Base64.getDecoder().decode(cipherText);
+                        
+                        // The IV needs to be unique, but not secure. Therefore it's common to
+                        // include it at the beginning of the ciphertext.
+                        // here we copy the first blockSize byte from bCipherText
+                        byte[] iv = new byte[blockSize];
+                        System.arraycopy(bCipherText, 0, iv, 0, iv.length);
+                        IvParameterSpec ivParams = new IvParameterSpec(iv);
+                        
+                        // remove iv from the bCipherText prefix
+                        bCipherText = Arrays.copyOfRange(bCipherText, iv.length, bCipherText.length);
+                        
+                        // CBC mode works on blocks so plaintexts may need to be padded to the
+                        // next whole block. If the original plainText lengths are not a multiple of the block size,
+                        // padding must be added when encrypting.
+                        // create cipher block with AES/CBC/PKCS5PADDING
+                        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+                        
+                        // init cipher
+                        cipher.init(Cipher.DECRYPT_MODE, skeySpec, ivParams);
+                        
+                        // decrypt bCipherText and store to the bPlaintext
+                        byte[] bPlaintext = cipher.doFinal(bCipherText);
+                        
+                        return new String(bPlaintext);
+
+                      } catch (Exception ex) {
+                        ex.printStackTrace();
+                      }
+                      
+                      return null;
+                    }
+                    
+                    public static void main(String[] args) throws
+                      NoSuchAlgorithmException,
+                      InvalidKeySpecException,
+                      InvalidKeyException,
+                      NoSuchPaddingException,
+                      InvalidAlgorithmParameterException,
+                      BadPaddingException,
+                      IllegalBlockSizeException,
+                      JSONException
+                    {
+                      // Encryption Test
+                      // -----------------------
+                      JSONObject jsonObj = new JSONObject();
+                      jsonObj.put("transaction_id", "SOCIALECONOMY-TEST001");
+                      jsonObj.put("msisdn", "628111243030");
+                      jsonObj.put("consentID", "consent001");
+                      jsonObj.put("partner_name", "testpartner");
+                      
+                      String plainText1 = jsonObj.toString();
+                      String secretKey1 = "telkomselS3cr3tK3y";
+                      String cipherText1 = AESCBC.encrypt(plainText1, secretKey1);
+                      System.out.println("encrypted text: " + cipherText1);
+                      
+                      // Decryption Test
+                      // -----------------------
+                      String cipherText2 = cipherText1;
+                      String secretKey2 = "telkomselS3cr3tK3y";
+                      String plainText2 = AESCBC.decrypt(cipherText2, secretKey2);
+                      System.out.println("plain text: " + plainText2);
+                    }
+                  }
+                </pre>
+              </div>
+
+              <div class="tab-pane fade" id="php" role="tabpanel" aria-labelledby="contact-tab">
+                <pre>
+                  &#60;?php
+                  
+                    define('AES_256_CBC', 'aes-256-cbc');
+                  
+                    // AESCBCEncrypt will encrypt plaint text with aes-256 cbc mode
+                    // and pkcs7 padding, then return an encoded base64 string.
+                    function AESCBCEncrypt($plainText, $secretKey) {
+                      // aes using 16 byte block size
+                      $blockSize = openssl_cipher_iv_length(AES_256_CBC);
+                    
+                      // we want aes-256 so we need  256 bit (32 byte) secretKey
+                      // here we use sha256 for creating 256 bit (32 byte) key
+                      $bKey = hash('sha256', $secretKey, true);
+                    
+                      // The IV needs to be unique, but not secure. Therefore it's common to
+                      // include it at the beginning of the cipherText.
+                      // iv must be the same size as blocksize
+                      $iv = openssl_random_pseudo_bytes($blockSize);
+                    
+                      // CBC mode works on blocks so plaintexts may need to be padded to the
+                      // next whole block. If the original plainText lengths are not a multiple of the block size,
+                      // padding must be added when encrypting.
+                      // encrypt bPlainText with pkcs7 padding
+                      $encrypted = openssl_encrypt($plainText, AES_256_CBC, $bKey, OPENSSL_RAW_DATA, $iv);
+                    
+                      // append iv to the beginning bCipherText
+                      $cipherText = $iv . $encrypted;
+                    
+                      // encode bCipherText with base64
+                      return base64_encode($cipherText);
+                    }
+                  
+                    // AESCBCDecrypt will decrypt base64 ciphertext with aes-256 cbc mode
+                    // and pkcs7 unpadding then return a plain text string.
+                    function AESCBCDecrypt($cipherText, $secretKey) {
+                      // aes using 16 byte block size
+                      $blockSize = openssl_cipher_iv_length(AES_256_CBC);
+                    
+                      // we want aes-256 so we need  256 bit (32 byte) secretKey
+                      // here we use sha256 for creating 256 bit (32 byte) key
+                      $bKey = hash('sha256', $secretKey, true);
+                    
+                      // decode base64 from cipherText
+                      $bCipherText = base64_decode($cipherText);
+                    
+                      // The IV needs to be unique, but not secure. Therefore it's common to
+                      // include it at the beginning of the ciphertext.
+                      // here we copy the first blockSize byte from bCipherText
+                      $iv = substr($bCipherText, 0, $blockSize);
+                    
+                      // remove iv from the bCipherText prefix
+                      $bFinalCipherText = substr($bCipherText, $blockSize);
+                    
+                      // decrypt cipherText and store to the bPlaintext
+                      $bPlaintext = openssl_decrypt($bFinalCipherText, AES_256_CBC, $bKey, OPENSSL_RAW_DATA, $iv);
+
+                      return $bPlaintext;
+                    }
+                  
+                    // Encryption Test
+                    // -----------------------
+                    $plainText1 = '{
+                      "transaction_id": "SOCIALECONOMY-TEST001",
+                      "msisdn": "628111243030",
+                      "consentID": "consent001",
+                      "partner_name": "testpartner"
+                    }';
+                    $secretKey1 = "telkomselS3cr3tK3y";
+                    $cipherText1 = AESCBCEncrypt($plainText1, $secretKey1);
+                    echo "encrypted text: ", $cipherText1, "\n";
+                  
+                    // Decryption Test
+                    // -----------------------
+                    $cipherText2 = $cipherText1;
+                    $secretKey2 = "telkomselS3cr3tK3y";
+                    $plainText2 = AESCBCDecrypt($cipherText2, $secretKey2);
+                    echo "plain text: ", $plainText2, "\n";
+
+                  ?&#62;
+                </pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>

@@ -12,16 +12,28 @@ span#container-api-response-title {
 </style>
 
 <main id="main" class="main">
+    <div class="pagetitle">
+        <h1>Telco Test</h1>
+        <!--
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                <li class="breadcrumb-item active">Dashboard</li>
+            </ol>
+        </nav>
+        -->
+    </div>
+
     <section class="section">
         <div class="row">
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Request</h5>
+                        <h5 class="card-title">Request Data</h5>
 
                         <div id="alert-telco-request-error" class="alert alert-danger alert-dismissible fade show" role="alert" style="display:none;">
                             <i class="bi bi-exclamation-octagon me-1"></i>
-                            Please check your input forms. Make sure all input fields are filled.
+                            Please check your input form. Make sure all input fields are filled.
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
 
@@ -37,7 +49,7 @@ span#container-api-response-title {
                             <div class="col-lg-6">
                                 <div class="col-md-12 input-client-id">
                                     <div class="form-floating">
-                                        <input type="text" class="form-control input-fields bg-light disabled" id="input-client-id" name="input_client_id" placeholder="Client ID" value="{{ Auth::user()->username }}" readonly="readonly">
+                                        <input type="text" class="form-control input-fields bg-light disabled" id="input-client-id" name="input_client_id" placeholder="Client ID" value="{{ $profile->client_id }}" readonly="readonly">
                                         <label for="input-client-id">Client ID</label>
                                     </div>
                                 </div>
@@ -74,7 +86,7 @@ span#container-api-response-title {
                                 <div class="col-md-12 mt-3 input-rows input-msisdn">
                                     <div class="form-floating">
                                         <input type="number" class="form-control input-fields" id="input-msisdn" name="input_msisdn" min="1000000000000" max="6289999999999" placeholder="62812xxxxxxxx, 62821xxxxxxxx">
-                                        <label for="input-msisdn">MSISDN / Key (eg. 62812xxxxxxxx, 62821xxxxxxxx)</label>
+                                        <label for="input-msisdn">MSISDN / Key (eg. 62812xxxxxxxx)</label>
                                     </div>
                                 </div>
                                 
@@ -265,7 +277,7 @@ span#container-api-response-title {
                         <form class="row g-3" id="form-input" name="form-input">
                             <div class="col-12">
                                 <label for="container-request-raw-data" class="form-label">Raw Data</label>
-                                <textarea class="form-control" id="container-request-raw-data" style="height:280px;" readonly></textarea>
+                                <textarea class="form-control" id="container-request-raw-data" style="height:428px;" readonly></textarea>
                             </div>
                         </form>
                     </div>

@@ -40,7 +40,7 @@
               -->
 
               <div class="card-body">
-                <h5 class="card-title">Total API Calls <!-- <span>| Today</span> --></h5>
+                <h5 class="card-title">Today's API Calls <!-- <span>| Today</span> --></h5>
 
                 <div class="d-flex align-items-center">
                   <!--
@@ -79,7 +79,7 @@
               -->
 
               <div class="card-body">
-                <h5 class="card-title">Total Success Rate <!-- <span>| This Month</span> --></h5>
+                <h5 class="card-title">Today's Success Rate <!-- <span>| This Month</span> --></h5>
 
                 <div class="d-flex align-items-center">
                   <!--
@@ -116,7 +116,7 @@
               -->
 
               <div class="card-body">
-                <h5 class="card-title">Total Success Calls <!-- <span>| This Year</span> --></h5>
+                <h5 class="card-title">Today's Success Calls <!-- <span>| This Year</span> --></h5>
 
                 <div class="d-flex align-items-center">
                   <!--
@@ -153,7 +153,7 @@
               -->
 
               <div class="card-body">
-                <h5 class="card-title">Total Failed Calls <!-- <span>| This Year</span> --></h5>
+                <h5 class="card-title">Today's Failed Calls <!-- <span>| This Year</span> --></h5>
 
                 <div class="d-flex align-items-center">
                   <!--
@@ -189,7 +189,7 @@
               -->
               
               <div class="card-body">
-                <h5 class="card-title">5 Recent API Calls <!-- <span>| Today</span> --></h5>
+                <h5 class="card-title">Today's 10 Recent API Calls <!-- <span>| Today</span> --></h5>
                 <div class="dataTable-wrapper dataTable-loading no-footer sortable searchable fixed-columns">
                   
                   <div class="dataTable-container">
@@ -199,9 +199,11 @@
                           <th scope="col" data-sortable="" style="width: 15.601%;">
                             <span class="dataTable-sorter">Date</span>
                           </th>
+                          <!--
                           <th scope="col" data-sortable="" style="width: 22.5064%;">
                             <span class="dataTable-sorter">Transaction ID</span>
                           </th>
+                          -->
                           <th scope="col" data-sortable="" style="width: 26.3427%;">
                             <span class="dataTable-sorter">Product</span>
                           </th>
@@ -212,13 +214,13 @@
                       </thead>
                   
                       <tbody>
-                        @foreach($api_calls AS $keyApiCalls => $valApiCalls)
+                        @foreach($current_list AS $keyApiCalls => $valApiCalls)
                         <tr>
                           <td scope="row">{{ $valApiCalls->created_at }}</td>
-                          <td>{{ $valApiCalls->transaction_id }}</td>
+                          <!-- <td>{{ $valApiCalls->transaction_id }}</td> -->
                           <td>{{ $valApiCalls->product_name }}</td>
 
-                          @if ($valApiCalls->status_code === 0)
+                          @if ($valApiCalls->status_code === '00000')
                           <td><span class="badge bg-success">{{ $valApiCalls->status_description }}</span></td>
                           @else
                           <td><span class="badge bg-danger">{{ $valApiCalls->status_description or 'Failed' }}</span></td>
@@ -254,6 +256,7 @@
 </main>
 
 @push('javascript')
+<script src="{{ url('vendor/echarts/echarts.min.js') }}"></script>
 <script type="text/javascript">
   var dataTableContainer = '';
   var callsChart = '';
@@ -326,7 +329,15 @@
             value: @php if ($total_failed_calls > 0) echo $total_failed_calls; else echo 'null'; @endphp,
             name: 'Failed Calls'
           },
-          { value: @php if ($total_success_calls > 0) echo $total_success_calls; else echo 'null'; @endphp, name: 'Success Calls' },
+          {
+            value: @php if ($total_success_calls > 0) echo $total_success_calls; else echo 'null'; @endphp,
+            name: 'Success Calls',
+            color: 'rgba(255, 0, 0, 0.5)',
+          },
+        ],
+        color: [
+          '#dc3545',
+          '#20c997',
         ],
       }],
     });

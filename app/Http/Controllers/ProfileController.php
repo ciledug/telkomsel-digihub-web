@@ -24,8 +24,24 @@ class ProfileController extends Controller
      */
     public function index()
     {
+        $profile = UserProfile::select(
+                'users.name', 'users.email',
+                'user_profiles.client_id', 'user_profiles.company', 'user_profiles.address', 'user_profiles.company_site',
+                'user_profiles.contact_person', 'user_profiles.cp_email', 'user_profiles.cp_phone', 'user_profiles.status',
+                'legal_entities.name AS legal_entity_name',
+                'business_fields.name AS business_field_name',
+                'job_positions.name AS job_position_name'
+            )
+            ->leftJoin('users', 'user_profiles.user_id', '=', 'users.id')
+            ->leftJoin('legal_entities', 'user_profiles.legal_entity', '=', 'legal_entities.id')
+            ->leftJoin('business_fields', 'user_profiles.business_field', '=', 'business_fields.id')
+            ->leftJoin('job_positions', 'user_profiles.cp_position', '=', 'job_positions.id')
+            ->where('user_profiles.user_id', '=', Auth::user()->id)
+            ->first();
+        // dd($profile);
+
         return view('profile.index', [
-            'profile' => UserProfile::find(Auth::user()->id),
+            'profile' => $profile,
         ]);
     }
 

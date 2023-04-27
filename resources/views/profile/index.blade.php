@@ -42,7 +42,6 @@
               </li>
             </ul>
             
-
             <!-- tab contents -->
             <div class="tab-content pt-2">
               @if (session('password_changed_ok'))
@@ -59,17 +58,17 @@
 
                 <div class="row">
                   <div class="col-lg-3 col-md-4 label ">Client ID</div>
-                  <div class="col-lg-9 col-md-8">{{ Auth::user()->username }}</div>
+                  <div class="col-lg-9 col-md-8">{{ $profile->client_id }}</div>
                 </div>
                 
                 <div class="row">
                   <div class="col-lg-3 col-md-4 label ">Legal Entity</div>
-                  <div class="col-lg-9 col-md-8">{{ $profile->legal_entity }}</div>
+                  <div class="col-lg-9 col-md-8">{{ $profile->legal_entity_name }}</div>
                 </div>
 
                 <div class="row">
                   <div class="col-lg-3 col-md-4 label ">Business Field</div>
-                  <div class="col-lg-9 col-md-8">{{ $profile->business_field }}</div>
+                  <div class="col-lg-9 col-md-8">{{ $profile->business_field_name }}</div>
                 </div>
 
                 <div class="row">
@@ -82,7 +81,6 @@
                   <div class="col-lg-9 col-md-8">{{ $profile->company_site }}</div>
                 </div>
                 
-                
                 <h5 class="card-title">Contact Person</h5>
                 
                 <div class="row">
@@ -92,7 +90,7 @@
                 
                 <div class="row">
                   <div class="col-lg-3 col-md-4 label">Position</div>
-                  <div class="col-lg-9 col-md-8">{{ $profile->cp_position }}</div>
+                  <div class="col-lg-9 col-md-8">{{ $profile->job_position_name }}</div>
                 </div>
                 
                 <div class="row">

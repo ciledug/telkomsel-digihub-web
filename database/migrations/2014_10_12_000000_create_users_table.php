@@ -23,7 +23,7 @@ class CreateUsersTable extends Migration
             $table->string('username', 20)->unique()->nullable();
             $table->string('email', 50)->unique();
             $table->string('password');
-            $table->tinyInteger('enc_key')->nullable()->comment('0:blank, 1:dalnet_key, 2:client_key');
+            $table->tinyInteger('enc_key')->nullable()->comment('0:both, 1:dalnet_key, 2:client_key');
             $table->rememberToken();
             $table->timestamps();
             $table->timestamp('deleted_at')->nullable();

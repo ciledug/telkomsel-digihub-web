@@ -23,14 +23,14 @@
   <link href="{{ url('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
   <link href="{{ url('vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
   <link href="{{ url('vendor/boxicons/css/boxicons.min.css') }}" rel="stylesheet">
+  {{--
   <link href="{{ url('vendor/quill/quill.snow.css') }}" rel="stylesheet">
   <link href="{{ url('vendor/quill/quill.bubble.css') }}" rel="stylesheet">
   <link href="{{ url('vendor/remixicon/remixicon.css') }}" rel="stylesheet">
-  <!--
   <link href="{{ url('vendor/simple-datatables/style.css') }}" rel="stylesheet">
   <link href="//cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css" rel="stylesheet">
   <link href="{{ url('css/dataTables.bootstrap5.min.css') }}" rel="stylesheet">
-  -->
+  --}}
 
   <!-- Template Main CSS File -->
   <link href="{{ url('css/style.css') }}" rel="stylesheet">

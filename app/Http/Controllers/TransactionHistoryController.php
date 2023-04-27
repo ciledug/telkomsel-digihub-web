@@ -27,7 +27,7 @@ class TransactionHistoryController extends Controller
     {
         $totalCallsData = $this->getTotalCallsData();
         $apiRequests = $this->getTransactionsByDate();
-        // dd($apiRequests);
+        // dd($totalCallsData); die();
 
         return view('transaction.index', [
             'api_requests' => $apiRequests,
@@ -65,9 +65,12 @@ class TransactionHistoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($param)
     {
-        //
+        return view('transaction.index', [
+            'show' => 'list-per-date',
+            'transactions_list' => $this->getTransactionsList($param),
+        ]);
     }
 
     /**
@@ -106,26 +109,35 @@ class TransactionHistoryController extends Controller
 
     private function getTotalCallsData()
     {
-        $apiRequests = ClientApiRequest::select('client_api_responses.status_code')
+        $apiRequests = ClientApiRequest::select(
+                'client_api_responses.status_code'
+            )
             ->where('client_api_requests.client_id', '=', Auth::user()->id)
             ->leftJoin('client_api_responses', 'client_api_requests.id', '=', 'client_api_responses.request_id')
+            ->orderBy('client_api_requests.created_at', 'DESC')
             ->get();
+        // dd($apiRequests); die();
 
         $totalSuccessCalls = 0;
         $totalFailedCalls = 0;
         $totalSuccessRate = 0;
 
         foreach ($apiRequests AS $keyApiRequest => $valApiRequest) {
-            if (!empty($valApiRequest->status_code) && ((int)$valApiRequest->status_code == 0)) {
-                $apiRequests[$keyApiRequest]->status_code = 0;
-                $totalSuccessCalls++;
-            } else {
-                $apiRequests[$keyApiRequest]->status_code = -1;
+            if (!empty($valApiRequest->status_code)) {
+                if ($valApiRequest->status_code === '00000') {
+                    $totalSuccessCalls++;
+                }
+                else {
+                    $totalFailedCalls++;
+                }
+            }
+            else {
                 $totalFailedCalls++;
             }
         }
 
-        if ($totalSuccessCalls > 0) $totalSuccessRate = ($totalSuccessCalls / $apiRequests->count()) * 100;
+        if ($totalSuccessCalls > 0)
+            $totalSuccessRate = ($totalSuccessCalls / $apiRequests->count()) * 100;
 
         return [
             'total_api_calls' => $apiRequests->count(),
@@ -160,46 +172,36 @@ class TransactionHistoryController extends Controller
 
     private function getTransactionsByDate()
     {
-        $apiRequests = ClientApiRequest::select('client_api_requests.id')
-            ->selectRaw('DATE(client_api_requests.created_at) created_at, COUNT(client_api_requests.product_id) total_api_calls')
-            ->where('client_api_requests.client_id', '=', Auth::user()->id)
+        $apiRequests = ClientApiRequest::selectRaw("
+                DATE(client_api_requests.created_at) AS api_date,
+                COUNT(DISTINCT(product_id)) AS count_product_apis,
+                COUNT(IF(client_api_responses.status_code = '00000', 1, NULL)) AS count_success_calls,
+                COUNT(IF(client_api_responses.status_code <> '00000', 1, IF(client_api_responses.status_code IS NULL, 1, NULL))) AS count_failed_calls,
+                COUNT(client_api_requests.id) AS count_total_calls
+            ")
             ->leftJoin('client_api_responses', 'client_api_requests.id', '=', 'client_api_responses.request_id')
+            ->where('client_api_requests.client_id', '=', Auth::user()->id)
             ->groupBy(DB::raw('DATE(client_api_requests.created_at)'))
-            ->orderBy('client_api_requests.id', 'DESC')
+            ->orderBy('client_api_requests.created_at', 'DESC')
             ->paginate(10);
-            // ->get();
-        // dd($apiRequests);
+        // dd($apiRequests); die();
+        return $apiRequests;
+    }
 
-        foreach ($apiRequests AS $keyApiRequest => $valApiRequest) {
-            $apiRequests[$keyApiRequest]->total_calls = 0;
-            $apiRequests[$keyApiRequest]->success_calls = 0;
-            $apiRequests[$keyApiRequest]->failed_calls = 0;
-            $apiRequests[$keyApiRequest]->success_rate = 0;
-
-            $apiRequests[$keyApiRequest]->api_used = ClientApiRequest::select('client_api_requests.product_id')
-                ->where('created_at', 'LIKE', Carbon::parse($valApiRequest->created_at)->format('Y-m-d') . '%')
-                ->groupBy('product_id')
-                ->count();
-
-            $apiResponses = ClientApiResponse::select('client_api_responses.status_code', 'client_api_requests.product_id')
-                ->leftJoin('client_api_requests', 'client_api_responses.request_id', '=', 'client_api_requests.id')
-                ->where('client_api_responses.created_at', 'LIKE', Carbon::parse($valApiRequest->created_at)->format('Y-m-d') . '%')
-                ->get();
-
-            foreach ($apiResponses AS $keyApiResponse => $valApiResponse) {
-                if (!empty($valApiResponse->status_code) && ((int)$valApiResponse->status_code == 0)) {
-                    $apiRequests[$keyApiRequest]->success_calls++;
-                } else {
-                    $apiRequests[$keyApiRequest]->failed_calls++;
-                }
-
-                if ($apiRequests[$keyApiRequest]->success_calls > 0) {
-                    $apiRequests[$keyApiRequest]->success_rate = ($apiRequests[$keyApiRequest]->success_calls / $apiResponses->count()) * 100;
-                }
-            }
-
-            $apiRequests[$keyApiRequest]->total_calls = $apiResponses->count();
-        }
+    private function getTransactionsList($paramDate)
+    {
+        $apiRequests = ClientApiRequest::select(
+                'client_api_requests.transaction_id', 'client_api_requests.consent_ref', 'client_api_requests.created_at',
+                'client_api_responses.status_code', 'client_api_responses.status_description',
+                'products.name AS api_name'
+            )
+            ->leftJoin('client_api_responses', 'client_api_requests.id', '=', 'client_api_responses.request_id')
+            ->leftJoin('products', 'client_api_requests.product_id', '=', 'products.id')
+            ->where('client_api_requests.client_id', '=', Auth::user()->id)
+            ->where('client_api_requests.created_at', 'LIKE', $paramDate . '%')
+            ->orderBy('client_api_requests.id', 'DESC')
+            ->paginate(15);
+        // dd($apiRequests); die();
 
         return $apiRequests;
     }

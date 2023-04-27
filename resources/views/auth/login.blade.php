@@ -17,7 +17,7 @@
                             <div class="card-body">
                                 <div class="pt-4 pb-2">
                                     <h5 class="card-title text-center pb-0 fs-4">Login to Your Account</h5>
-                                    <p class="text-center small">Enter your username &amp; password to login</p>
+                                    <p class="text-center small">Enter your email &amp; password to login</p>
 
                                     @if ($errors->has('login_invalid'))
                                     <div class="mb-2 text-center invalid-feedback" style="display:block;">
@@ -30,8 +30,8 @@
                                     {{ csrf_field() }}
 
                                     <div class="col-12">
-                                        <label for="username" class="form-label">Username</label>
-                                        <input type="text" id="username" name="username" class="form-control" minlength="6" maxlength="50" value="{{ old('username') }}" required autofocus>
+                                        <label for="username" class="form-label">Email</label>
+                                        <input type="email" id="username" name="username" class="form-control" minlength="6" maxlength="50" value="{{ old('username') }}" required autofocus>
                                         @if ($errors->has('username'))
                                         <div class="invalid-feedback" style="display:block">
                                             <strong>{{ $errors->first('username') }}</strong>
