@@ -19,6 +19,7 @@ class CreateJobPositionsTable extends Migration
 
             $table->increments('id');
             $table->string('name', 30);
+            $table->tinyInteger('pos_sequence')->unsigned()->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

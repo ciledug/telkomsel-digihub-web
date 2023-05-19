@@ -13,13 +13,13 @@ class UserClientApiSeeder extends Seeder
      */
     public function run()
     {
-        $products = Product::all();
+        // $products = Product::all();
 
-        foreach ($products AS $key => $value) {
-            UserClientApi::create([
-                'user_id' => 1,
-                'product_id' => $value->id,
-            ]);
-        }
+        // foreach ($products AS $key => $value) {
+        //     UserClientApi::create([
+        //         'user_id' => 1,
+        //         'product_id' => $value->id,
+        //     ]);
+        // }
     }
 }

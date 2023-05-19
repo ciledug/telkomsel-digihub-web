@@ -19,8 +19,8 @@ class CreateClientAPIRequestsTable extends Migration
 
             $table->increments('id');
             $table->integer('client_id')->unsigned();
-            $table->string('transaction_id', 30);
             $table->tinyInteger('product_id')->unsigned();
+            $table->string('transaction_id', 30);
             $table->string('consent_ref');
             $table->integer('created_at_timestamp')->nullable();
             $table->timestamps();

@@ -43,6 +43,12 @@ span#container-api-response-title {
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
 
+                        <div id="alert-telco-error" class="alert alert-danger alert-dismissible fade show" role="alert" style="display:none;">
+                            <i class="bi bi-exclamation-octagon me-1"></i>
+                            <span id="alert-telco-error-message"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
                         <form id="form-request-v01" class="row g-3 needs-validation" method="POST" action="{{ route('telco_v01.send') }}">
                             {{ csrf_field() }}
                             
@@ -93,7 +99,7 @@ span#container-api-response-title {
                                 <!-- location scoring -->
                                 <div class="col-md-12 mt-3 input-rows input-location-scoring-address-type">
                                     <fieldset class="row">
-                                        <legend class="col-form-label col-sm-3 pt-0">Address Type</legend>
+                                        <legend class="col-form-label col-sm-3 pt-0">Address Info</legend>
                                         <div class="col-sm-9">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="radio_home_work" id="radio-home-work-yes" value="1">
@@ -113,7 +119,7 @@ span#container-api-response-title {
                     
                                 <div class="col-md-12 mt-3 input-rows input-location-scoring-address-info">
                                     <fieldset class="row">
-                                        <legend class="col-form-label col-sm-3 pt-0">Address Info</legend>
+                                        <legend class="col-form-label col-sm-3 pt-0">Address Type</legend>
                                         <div class="col-sm-9">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="radio_address_info" id="radio-address-info-geolocation" value="geolocation">
@@ -260,7 +266,7 @@ span#container-api-response-title {
                             <hr>
 
                             <div class="text-center">
-                                <button type="submit" id="btn-submit" class="btn btn-primary">Submit</button>
+                                <button type="submit" id="btn-submit" class="btn btn-primary btn-modal-spinner">Submit</button>
                                 <input type="hidden" id="selected-product" name="selected-product" value="">
                                 <input type="hidden" id="selected-address-info" name="selected-address-info" value="">
                             </div>
@@ -287,7 +293,7 @@ span#container-api-response-title {
             <div class="col-lg-6">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Respond for <span id="container-api-response-title"></span></h5>
+                        <h5 class="card-title">Response for <span id="container-api-response-title"></span></h5>
               
                         <form class="row g-3">
                             <div class="col-12">
@@ -296,7 +302,7 @@ span#container-api-response-title {
                             </div>
                 
                             <div class="col-12">
-                                <label for="container-respond-deciphered-ciphertext" class="form-label">Deciphered Ciphertext</label>
+                                <label for="container-respond-deciphered-ciphertext" class="form-label">Result Data</label>
                                 <textarea class="form-control" id="container-respond-deciphered-ciphertext" style="height:100px;" readonly></textarea>
                             </div>
                         </form>
@@ -309,14 +315,14 @@ span#container-api-response-title {
 
 @push('javascript')
 <script type="text/javascript">
-var tempApiRequest = [];
-var tempApiResponses = [];
+var prevApiResponses = [];
 var selectedProduct = $('#selected-product').val().toLowerCase();
 
 function prepareProductsDropDown() {
     $('#input-product-id').change(function(e) {
         $('#selected-product').val(($(this).val()));
         selectedProduct = $('#selected-product').val().toLowerCase();
+        // console.log(selectedProduct);
         updateForm();
     });
 };
@@ -326,14 +332,11 @@ function updateForm() {
     $('.input-rows').hide();
     $('.input-rows').removeAttr('required');
     
-    
     var title = '';
     var apiRequest = '';
     var apiResponse = '';
-    var decipheredText = '';
-
-    var existingRequest = undefined;
-    var existingResponse = undefined;
+    var apiResult = '';
+    var prevApi = undefined;
 
     if (selectedProduct.trim() !== '') {
         switch(selectedProduct) {
@@ -356,19 +359,21 @@ function updateForm() {
             case 'tscore': $('.input-telco-score-bin-25').show(); title = 'Telco Score BIN 25'; break;
         }
 
-        existingRequest = tempApiRequest[selectedProduct];
-        existingResponse = tempApiResponses[selectedProduct];
+        prevApi = prevApiResponses[selectedProduct];
+        // console.log(prevApi);
     }
-    
-    if (existingRequest !== undefined) {
-        apiRequest = existingRequest.request;
-    }
-    
-    if (existingResponse !== undefined) {
-        apiResponse = existingResponse.api_response;
+
+    if (prevApi !== undefined) {
+        if (prevApi.api_request !== undefined) {
+            apiRequest = prevApi.data.api_request;
+        }
         
-        if (parseInt(apiResponse.transaction.status_code, 10) === 0) {
-            decipheredText = existingResponse.result;
+        if (prevApi.api_response !== undefined) {
+            apiResponse = prevApi.data.api_response;
+        }
+
+        if (prevApi.api_result !== undefined) {
+            apiResult = prevApi.data.api_result;
         }
     }
     
@@ -376,7 +381,7 @@ function updateForm() {
     $('#container-api-response-title').text(title);
     $('#container-request-raw-data').val(JSON.stringify(apiRequest));
     $('#container-respond-raw-data').val(JSON.stringify(apiResponse));
-    $('#container-respond-deciphered-ciphertext').val(JSON.stringify(decipheredText));
+    $('#container-respond-deciphered-ciphertext').val(JSON.stringify(apiResult));
 };
 
 function prepareAddressType() {
@@ -429,6 +434,9 @@ function submitData(formData) {
     $('#container-request-raw-data').empty();
     $('#container-respond-raw-data').empty();
     $('#container-respond-deciphered-ciphertext').empty();
+
+    $('#alert-telco-error-message').text('');
+    $('#alert-telco-error').hide();
     
     $.ajax({
         type: 'POST',
@@ -438,42 +446,44 @@ function submitData(formData) {
         processData: false,
         contentType: false,
         cache: false,
-        success: function(apiResponse) {
-            var response = apiResponse.data;
-            // console.log(response);
+        success: function(response) {
+            // console.log(apiResponse);
 
-            if (response !== undefined) {
-                if (response.request !== undefined) {
-                    $('#container-request-raw-data').val(JSON.stringify(response.request));
-                }
-                
-                if (response.api_response !== undefined) {
-                    $('#container-respond-raw-data').val(JSON.stringify(response.api_response));
-
-                    var statusCode = parseInt(response.api_response.transaction.status_code, 10);
-                    if (statusCode == 0) {
-                        $('#container-respond-deciphered-ciphertext').val(JSON.stringify(response.result));
-                    }
-
-                    tempApiRequest[selectedProduct] = response;
-                    tempApiResponses[selectedProduct] = response;
-                }
-
-                if (response.error !== undefined) {
-                    console.log(response.error);
-                }
+            if (response.code !== 200) {
+                // console.log(apiResponse.message);
+                $('#alert-telco-error-message').text(response.message);
+                $('#alert-telco-error').show();
             }
             else {
-                $('#alert-telco-login-needed').show();
+                if (response.data.api_request !== undefined) {
+                    $('#container-request-raw-data').val(JSON.stringify(response.data.api_request));
+                }
+                
+                if (response.data.api_response !== undefined) {
+                    $('#container-respond-raw-data').val(JSON.stringify(response.data.api_response));
+                }
+
+                if (response.data.api_result !== undefined) {
+                    $('#container-respond-deciphered-ciphertext').val(JSON.stringify(response.data.api_result));
+                }
+                else {
+                    $('#container-respond-deciphered-ciphertext').val('');
+                }
+
+                prevApiResponses[selectedProduct] = response;
+                // console.log(prevApiResponses);
             }
         },
         error: function(error) {
             console.log('error: ' + error.responseText);
+            $('#alert-telco-error-message').text(error.responseText);
+            $('#alert-telco-error').show();
             $('#container-respond-raw-data').val(JSON.stringify(error.responseText));
         }
     })
     .always(function() {
         $('#btn-submit').prop('disabled', false);
+        hideProgressScreen();
     });
 };
 
@@ -484,6 +494,10 @@ $(document).ready(function() {
     prepareSubmitButton();
     
     $('#input-product-id').val('').trigger('change');
+
+    $('.btn-modal-spinner').click(function(e) {
+        showProgressScreen();
+    });
 });
 </script>
 @endpush

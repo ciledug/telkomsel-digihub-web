@@ -42,6 +42,13 @@ class TelcoController extends Controller
         // dd($request->input());
         // dd(Auth::user());
 
+        $response = [
+            'code' => 500,
+            'message' => 'Server error',
+            'count' => 0,
+            'data' => [],
+        ];
+
         $validator = Validator::make($request->input(), [
             'input_product_id' => 'required|string',
             'input_transaction_id' => 'required|string',
@@ -57,8 +64,18 @@ class TelcoController extends Controller
             ->where('telco_name', '=', $request->input_product_id)
             ->first();
 
+        $requestId = $this->saveApiRequest(
+            Auth::user()->id,
+            $request->input_transaction_id,
+            $product->id,
+            $request->input_consent,
+            Carbon::now('Asia/Jakarta')->getTimestamp()
+        );
+
         if ($product) {
             $apisUrl = env('DALNET_TELCO_API_GATEWAY', '') . '/v1';
+            $statusCode = '-1';
+            $statusDesc = 'Access token failed';
         
             $postedRequest = array(
                 'transaction_id' => $request->input_transaction_id,
@@ -165,6 +182,7 @@ class TelcoController extends Controller
                     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                     CURLOPT_CUSTOMREQUEST => 'POST',
                     CURLOPT_POSTFIELDS => $postedRequest,
+                    CURLOPT_FOLLOWLOCATION => false,
                     CURLOPT_HTTPHEADER => array(
                         'Accept: */*',
                         'Authorization: Bearer ' . session('api_token'),
@@ -174,41 +192,44 @@ class TelcoController extends Controller
                 )
             );
             
-            $response = curl_exec($curl); // echo 'response: ' . $response; die();
-            $err = curl_error($curl);
+            $curlResponse = curl_exec($curl); // echo 'curlResponse: ' . $curlResponse; die();
+            $err = curl_error($curl); // echo $err; die();
             $curlResult = '';
             curl_close($curl);
-
-            if ($err) { $curlResult = [ 'error' => $err ]; }
-            else { $curlResult = $response; }
-
-            $requestId = $this->saveApiRequest(
-                Auth::user()->id,
-                $postedRequest['transaction_id'],
-                $product->id,
-                $postedRequest['consent'],
-                Carbon::now('Asia/Jakarta')->getTimestamp()
-            );
-
-            if (empty($err)) {
-                $jsonResponse = json_decode($response);
-                // dd($jsonResponse); die();
-
-                $statusCode = '-1';
-                $statusDesc = 'Access token failed';
-                if ($jsonResponse != null) {
-                    $statusCode = $jsonResponse->data->api_response->transaction->status_code;
-                    $statusDesc = $jsonResponse->data->api_response->transaction->status_desc;
-                }
-
-                $this->saveApiResponse($requestId->id, $statusCode, $statusDesc);
-            }
             
-            return response()->json(json_decode($curlResult), 200);
+            if (empty($err)) {
+                // dd($curlResponse); die();
+
+                if ($curlResponse != null) {
+                    $curlResponse = json_decode($curlResponse);
+                    // dd($curlResponse); die();
+
+                    if (isset($curlResponse->data)) {
+                        $statusCode = $curlResponse->data->api_response->transaction->status_code;
+                        $statusDesc = $curlResponse->data->api_response->transaction->status_desc;
+                        $response['code'] = 200;
+                        $response['message'] = 'OK';
+                        $response['count'] = 1;
+                        $response['data'] = $curlResponse->data;
+                    }
+                    else {
+                        $response['code'] = 403;
+                        $response['message'] = 'Login is expired or required';
+                    }
+                }
+            }
+            else {
+                $statusDesc = $err;
+                $response['message'] = $err;
+            }
         }
         else {
-            echo 'Product does not exist';
+            $response['code'] = 404;
+            $response['message'] = 'Product API does not exist';
         }
+
+        $this->saveApiResponse($requestId->id, $statusCode, $statusDesc);
+        return response()->json($response, 200);
     }
 
     public function send_02(Request $request)

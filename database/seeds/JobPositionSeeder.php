@@ -13,10 +13,13 @@ class JobPositionSeeder extends Seeder
     public function run()
     {
         $POSITIONS = [
-            ['name' => 'Staff'],
-            ['name' => 'Manager'],
-            ['name' => 'Supervisor'],
-            ['name' => 'General Manager'],
+            ['name' => 'Staff', 'pos_sequence' => 1],
+            ['name' => 'Supervisor', 'pos_sequence' => 2],
+            ['name' => 'Manager', 'pos_sequence' => 3],
+            ['name' => 'General Manager', 'pos_sequence' => 4],
+            ['name' => 'Director', 'pos_sequence' => 5],
+            ['name' => 'President Director', 'pos_sequence' => 6],
+            ['name' => 'Owner', 'pos_sequence' => 7],
         ];
 
         foreach($POSITIONS AS $key => $value) {

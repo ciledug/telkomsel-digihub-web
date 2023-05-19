@@ -1,6 +1,19 @@
+<div class="modal fade" id="modal-spinner" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" style="display:none;" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary" role="status">
+                </div>
+                <br>
+                <span>Please wait...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
 <footer id="footer" class="footer">
     <div class="copyright">
-        &copy; Copyright <strong><span>PT DALnet System</span></strong>. All Rights Reserved
+        &copy; Copyright 2022 <strong><span>PT Dalnet System</span></strong>. All Rights Reserved
     </div>
     <div class="credits">
         <!-- All the links in the footer should remain intact. -->

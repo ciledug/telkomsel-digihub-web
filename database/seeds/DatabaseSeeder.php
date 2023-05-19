@@ -15,8 +15,8 @@ class DatabaseSeeder extends Seeder
         $this->call(JobPositionSeeder::class);
         $this->call(BusinessFieldSeeder::class);
         $this->call(LegalEntitySeeder::class);
-        $this->call(UserSeeder::class);
-        $this->call(UserProfileSeeder::class);
-        $this->call(UserClientApiSeeder::class);
+        // $this->call(UserSeeder::class);
+        // $this->call(UserProfileSeeder::class);
+        // $this->call(UserClientApiSeeder::class);
     }
 }

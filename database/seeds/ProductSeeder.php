@@ -13,7 +13,7 @@ class ProductSeeder extends Seeder
     public function run()
     {
         $PRODUCTS = [
-            [ 'name' => 'Location Sharing', 'telco_name' => 'idver' ],
+            [ 'name' => 'Location Scoring', 'telco_name' => 'idver' ],
             [ 'name' => 'KTP Match', 'telco_name' => 'ktpscore' ],
             [ 'name' => 'Recycle Number', 'telco_name' => 'recycle' ],
             [ 'name' => 'Active Roaming', 'telco_name' => 'roaming2' ],

@@ -25,7 +25,19 @@
     function submitLogout(event) {
         event.preventDefault();
         document.getElementById('logout-form').submit();
-    }
+    };
+
+    function showProgressScreen() {
+        $('#modal-spinner').modal('show');
+    };
+
+    function hideProgressScreen() {
+        $('#modal-spinner').modal('hide');
+    };
+
+    $(window).on('unload', function() {
+        showProgressScreen();
+    });
 </script>
 
 @stack('javascript')

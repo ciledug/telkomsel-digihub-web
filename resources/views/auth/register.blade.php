@@ -11,10 +11,18 @@
           </div>
 
           <div class="col-lg-12 col-md-12 d-flex flex-column align-items-center justify-content-center">
-
             <div class="card mb-3">
-
               <div class="card-body">
+                
+                @if ($errors && count($errors) > 0)
+                <div class="pt-4 pb-2">
+                  <div class="mb-2 text-center invalid-feedback" style="display:block;">
+                    @foreach ($errors AS $key => $value)
+                      <ul><strong>{{ $value }}</strong></ul>
+                    @endforeach
+                  </div>
+                </div>
+                @endif
 
                 <form id="form-register" class="row g-3 needs-validation" method="POST" action="{{ route('register') }}" enctype="multipart/form-data" novalidate>
                   {{ csrf_field() }}
@@ -29,8 +37,8 @@
                     
                     <div class="row">
                       <div class="col-12 mb-4">
-                        <label for="register-client-id" class="form-label">Client ID</label>
-                        <input type="text" name="register_client_id" class="form-control" id="register-client-id" minlength="5" maxlength="20" required>
+                        <label for="register-client-id" class="form-label">Client ID *</label>
+                        <input type="text" name="register_client_id" class="form-control" id="register-client-id" minlength="4" maxlength="20" required>
                         @if ($errors->has('register_client_id'))
                         <div class="invalid-feedback">
                           {{ $errors->first('register_client_id')}}
@@ -39,7 +47,7 @@
                       </div>
     
                       <div class="col-12 mb-4">
-                        <label for="register-company-name" class="form-label">Company Name</label>
+                        <label for="register-company-name" class="form-label">Company Name *</label>
                         <input type="text" name="register_company_name" class="form-control" id="register-company-name" minlength="5" maxlength="50" required>
                         @if ($errors->has('register_company_name'))
                         <div class="invalid-feedback">
@@ -86,7 +94,7 @@
 
                     <div class="row">
                       <div class="col-12 mb-4">
-                        <label for="register-full-name" class="form-label">Full Name</label>
+                        <label for="register-full-name" class="form-label">Full Name *</label>
                         <input type="text" name="register_full_name" class="form-control" id="register-full-name" minlength="5" maxlength="50" required>
                         @if ($errors->has('register_full_name'))
                         <div class="invalid-feedback">
@@ -96,7 +104,7 @@
                       </div>
     
                       <div class="col-12 mb-4">
-                        <label for="register-email" class="form-label">Email</label>
+                        <label for="register-email" class="form-label">Email *</label>
                         <input type="email" name="register_email" class="form-control" id="register-email" minlength="10" maxlength="50" required>
                         @if ($errors->has('register_email'))
                         <div class="invalid-feedback">
@@ -106,7 +114,7 @@
                       </div>
     
                       <div class="col-12 mb-4">
-                        <label for="register-phone" class="form-label">Phone</label>
+                        <label for="register-phone" class="form-label">Phone *</label>
                         <input type="tel" name="register_phone" class="form-control" id="register-phone" minlength="10" maxlength="15" required>
                         @if ($errors->has('register_phone'))
                         <div class="invalid-feedback">
@@ -116,7 +124,7 @@
                       </div>
     
                       <div class="col-12 mb-4">
-                        <label for="register-position" class="form-label">Position</label>
+                        <label for="register-position" class="form-label">Position *</label>
                         <select id="register-position" name="register_position" class="form-select" required>
                           <option selected=""></option>
                           @foreach ($job_positions AS $key => $value)
@@ -132,13 +140,13 @@
                     </div>
                   </div>
 
-                  <!-- account info -->
+                  <!-- login account info -->
                   <div class="col-4">
-                    <h5 class="card-title">Account Info</h5>
+                    <h5 class="card-title">Login Account Info</h5>
 
                     <div class="row">
                       <div class="col-12 mb-4">
-                        <label for="register-company-email" class="form-label">Email</label>
+                        <label for="register-company-email" class="form-label">Email *</label>
                         <input type="email" name="register_company_email" class="form-control" id="register-company-email" minlength="5" maxlength="50" required>
                         @if ($errors->has('register_company_email'))
                         <div class="invalid-feedback">
@@ -148,7 +156,7 @@
                       </div>
 
                       <div class="col-12 mb-4">
-                        <label for="register-password" class="form-label">Password</label>
+                        <label for="register-password" class="form-label">Password *</label>
                         <input type="password" name="password" class="form-control" id="register-password" minlength="6" maxlength="15" required>
                         @if ($errors->has('password'))
                         <div class="invalid-feedback">
@@ -158,7 +166,7 @@
                       </div>
     
                       <div class="col-12 mb-4">
-                        <label for="register-confirm-password" class="form-label">Confirm Password</label>
+                        <label for="register-confirm-password" class="form-label">Confirm Password *</label>
                         <input type="password" name="password_confirmation" class="form-control" id="register-confirm-password" minlength="6" maxlength="15" required>
                       </div>
                     </div>

@@ -19,6 +19,7 @@ class CreateUserProfilesTable extends Migration
 
             $table->increments('id');
             $table->integer('user_id')->unsigned();
+            $table->integer('api_id')->unsigned();
             $table->string('client_id', 15);
             $table->string('company', 50);
             $table->datetime('join_date')->nullable();
@@ -31,7 +32,6 @@ class CreateUserProfilesTable extends Migration
             $table->string('cp_position', 50)->nullable();
             $table->string('cp_email', 50)->nullable();
             $table->string('cp_phone', 50)->nullable();
-            $table->boolean('status')->default(false)->nullable();
 
             $table->timestamps();
         });

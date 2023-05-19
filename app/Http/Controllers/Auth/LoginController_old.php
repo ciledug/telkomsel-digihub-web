@@ -70,13 +70,9 @@ class LoginController extends Controller
             if ($userProfile) {
                 Auth::user()->client_id = $userProfile->client_id;
 
-                $loginApiResponse = json_decode(
-                    $this->loginApi(Auth::user()->email, $input['password'])
-                );
-                // dd($loginApiResponse); // die();
+                $loginApiResponse = json_decode($this->loginApi(Auth::user()->email, $input['password'])); // dd($loginApiResponse); // die();
 
                 if (isset($loginApiResponse->code) && ($loginApiResponse->code === 200)) {
-                    Auth::user()->status = $loginApiResponse->data->user->status;
                     $loginApiResponse = $loginApiResponse->data->token;
                 }
                 else {
